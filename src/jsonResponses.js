@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-// Loading in response files -SJH
+// Loading in json response files -SJH
 const success = fs.readFileSync(`${__dirname}/../json/success.json`);
 const unauthorized = fs.readFileSync(`${__dirname}/../json/unauthorized.json`);
 const resourceNotFound = fs.readFileSync(`${__dirname}/../json/resourceNotFound.json`);
