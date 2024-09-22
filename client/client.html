@@ -5,6 +5,88 @@
   <link rel="stylesheet" type="text/css" href="/style.css">
   
   <script>
+    let pageSelect;
+    let typeSelect;
+    let submitButton;
+    let contentRegion;
+
+    //Parses and displays the json -SJH
+    const parseJson = async (response) =>{
+      const jsonObj = await response.json();
+      console.log(jsonObj);
+
+      if (response.status === 200) {
+          contentRegion.innerHTML = "<h2>Success</h2><br><p>" + jsonObj.message + "</p>"
+        }
+        else {
+          contentRegion.innerHTML = "<h2>" + jsonObj.id + "</h2><br><p>" + jsonObj.message + "</p>"
+        }
+    }
+
+    //Parses and displays XML -SJH
+    const parseXml = async (response) => {
+      //Convert XML response into plain text for parsing, then grab the message element from  -SJH
+      response.text().then((responsePlainText => {
+        console.log(responsePlainText);
+        const parsedResponse = new window.DOMParser().parseFromString(responsePlainText, "text/xml");
+        const xmlMessage = parsedResponse.querySelector("message").innerHTML;
+
+        //Then assign an h2 based upon the status code -SJH
+        if (response.status === 200){
+          contentRegion.innerHTML = "<h2>Success</h2><br><p>" + xmlMessage + "</p>"
+        }
+        else /*if (response.status === 400)*/{
+          const xmlId = parsedResponse.querySelector("id").innerHTML;
+          contentRegion.innerHTML = "<h2>" + xmlId + "</h2><br><p>" + xmlMessage + "</p>"
+        }
+      }))
+    }
+
+    //Handles the response that comes back from the server after a request is sent. -SJH
+    const handleResponse = (response) => {
+      acceptType = response.headers.get("Content-Type");
+      //JSON responses -SJH
+      if (acceptType === "application/json"){
+
+        parseJson(response);
+      }
+      //XML responses -SJH
+      else if (acceptType === "text/xml"){
+        parseXml(response);
+      }
+      //If the type expected back isn't JSON or XML, something is wrong -SJH
+      else {
+        console.log("A problem occurred with the acceptType!")
+      }
+    }
+
+    //Called when the submit button is clicked. Sends a fetch request to the server 
+    //to get XML or JSON back. -SJH
+    const submitRequest = async () => {
+      const url = pageSelect.value;
+      const type = typeSelect.value;
+      const headerObject = {
+        headers: { "Accept": type}
+      }
+
+      const response = await fetch(url, headerObject)
+      handleResponse(response);
+    }
+
+    //Initialization method. Sets up event listeners for the menu system, which then send 
+    //requests to the server -SJH
+    const init = () => {
+      pageSelect = document.querySelector('#page');
+      typeSelect = document.querySelector('#type');
+      submitButton = document.querySelector("#send");
+      contentRegion = document.querySelector("#content");
+      submitButton.onclick = submitRequest;
+    };
+
+    //Waiting until the window loads to grab references to html elements -SJH
+    window.onload = () =>{
+      init();
+    }
 
   </script>
 </head>
